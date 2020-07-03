@@ -25,7 +25,7 @@ const createMetric = (
   };
 };
 
-const handler = async () => {
+export const handler = async (): Promise<void> => {
   try {
     const pulls = await getAllPRs();
     const counted = countOpenPRs({ data: pulls });
