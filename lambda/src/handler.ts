@@ -45,6 +45,7 @@ export const handler = async (): Promise<void> => {
     console.log(`${counted.length} repo state uploaded to CW`);
   } catch (err) {
     console.error(err);
+    throw err;
   }
 };
 
