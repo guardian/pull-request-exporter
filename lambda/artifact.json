@@ -1,5 +1,5 @@
 {
-  "projectName": "pull-request-exporter",
+  "projectName": "Editorial Tools::Pull Request Exporter",
   "vcsURL": "https://github.com/guardian/pull-request-exporter",
   "actions": [
     {
