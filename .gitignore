@@ -1,0 +1,9 @@
+node_modules
+.idea
+
+# Config
+config.json
+
+# Generated
+pulls.json
+counted-pulls.json

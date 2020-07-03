@@ -1,0 +1,19 @@
+{
+  "name": "stale-pr-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pulls:get": "ts-node src/getPulls.ts",
+    "start": "npm run pulls:get && npm run pulls:count",
+    "pulls:count": "ts-node src/countPulls.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@octokit/rest": "^17.11.0",
+    "typescript": "^3.9.5"
+  }
+}
