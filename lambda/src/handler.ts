@@ -31,7 +31,9 @@ const handler = async () => {
     const counted = countOpenPRs({ data: pulls });
     const cloudwatch = new CloudWatch({
       region: "eu-west-1",
-      credentials: new SharedIniFileCredentials({ profile: "media-service" })
+      ...(process.env.STAGE !== "PROD" && {
+        credentials: new SharedIniFileCredentials({ profile: "media-service" })
+      })
     });
 
     let n = 0;
