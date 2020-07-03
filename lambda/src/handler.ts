@@ -37,6 +37,8 @@ export const handler = async (): Promise<RepoWithPulls[]> => {
     });
 
     let n = 0;
+
+    console.log(`Uploading metrics for ${counted.length} repositories`);
     while (n < counted.length) {
       const metrics = createMetric(counted.slice(n, n + 20));
       console.log(`Uploading metrics for ${n} to ${n + 20} pulls`);
