@@ -1,0 +1,19 @@
+regions: [eu-west-1]
+stacks: [media-service]
+deployments:
+  pull-request-exporter:
+    type: aws-lambda
+    parameters:
+      bucket: media-service-dist
+      prefixStack: false
+      fileName: pull-request-exporter.zip
+      functionNames:
+       - "pull-request-exporter-function-"
+  cloudformation:
+    type: cloud-formation
+    app: pull-request-exporter-lambda
+    parameters:
+      prependStackToCloudFormationStackName: false
+      cloudFormationStackName: pull-request-exporter-lambda
+      templatePath: pull-request-exporter.yaml
+      cloudFormationStackByTags: false

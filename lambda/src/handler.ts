@@ -1,8 +1,7 @@
 import { getAllPRs } from "./getPulls";
 import { countOpenPRs } from "./utils/counter";
 import { RepoWithPulls } from "./utils/interfaces";
-import * as CloudWatch from "aws-sdk/clients/cloudwatch";
-import { SharedIniFileCredentials } from "aws-sdk";
+import { SharedIniFileCredentials, CloudWatch } from "aws-sdk";
 
 const createMetric = (
   repos: RepoWithPulls[]
@@ -26,7 +25,7 @@ const createMetric = (
   };
 };
 
-const handler = async (event?, context?) => {
+const handler = async () => {
   try {
     const pulls = await getAllPRs();
     const counted = countOpenPRs({ data: pulls });

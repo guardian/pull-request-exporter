@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Pull Request Metrics Exporter
+Parameters:
+  GitHubAPIToken:
+    Description: GitHub API token with `repo` permissions
+    Type: String
+  Stage:
+    Type: String
+    Description: Environment name
+    AllowedValues:
+      - TEST
+      - PROD
+    Default: TEST
+  LoggingRoleToAssumeArn:
+    Type: String
+    Description: Name of IAM role in logging account e.g. arn:aws:iam::222222222222:role/LoggingRole
+Resources:
+  PullRequestExporterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: PullRequestExporter
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: "*"
+              - Resource: !Ref 'LoggingRoleToAssumeArn'
+                Effect: Allow
+                Action: sts:AssumeRole
+  PullRequestExporterLambdaFunctionRule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: rate(1 hour)
+      Targets:
+        - Id: PullRequestExporterLambdaFunctionRule
+          Arn: !GetAtt [PullRequestExporterLambdaFunction, Arn]
+  InvokePullRequestExporterLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PullRequestExporterLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt [PullRequestExporterLambdaFunctionRule, Arn]
+  PullRequestExporterLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'pull-request-exporter-function-${Stage}'
+      Environment:
+        Variables:
+          STACK: media-service
+          APP: pull-request-exporter
+          STAGE: !Ref 'Stage'
+      Code:
+        S3Bucket: media-service-dist
+        S3Key: !Sub 'media-service/${Stage}/pull-request-exporter/pull-request-exporter.zip'
+      Description: Lambda exporting pull request metrics to CloudWatch
+      MemorySize: '256'
+      Timeout: '30'
+      Handler: build/src/handler.handler
+      Role: !GetAtt 'PullRequestExporterRole.Arn'
+      Runtime: nodejs12.x
+      Tags:
+        - { Key: Stack, Value: media-service }
+        - { Key: Stage, Value: !Ref Stage }
+        - { Key: App, Value: pull-request-exporter }
+        - { Key: APIToken, Value: !Sub GitHubAPIToken }

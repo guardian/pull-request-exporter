@@ -7,3 +7,6 @@ config.json
 # Generated
 pulls.json
 counted-pulls.json
+
+# Lambda build
+lambda/build

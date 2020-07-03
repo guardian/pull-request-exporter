@@ -1,6 +1,6 @@
 import { RepoWithPulls } from "./interfaces";
 import * as fs from "fs";
-const path = require("path");
+import path = require("path");
 
 function filterBots(prs: RepoWithPulls) {
   return prs.pulls.filter((pull) => {
@@ -17,11 +17,12 @@ export function countOpenPRs({
   file?: string;
   data?: RepoWithPulls[];
   bots?: boolean;
-}) {
-  const pullData = data ?? require(file);
+}): RepoWithPulls[] {
+  const pullData = file ? require(file) : data ?? null;
+
   let total = 0;
 
-  const sorted: RepoWithPulls[] = pullData
+  const sorted = pullData
     .sort((a, b) => (a.pulls.length < b.pulls.length ? 1 : -1))
     .filter(
       (pull, index, self) =>

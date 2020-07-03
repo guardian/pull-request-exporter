@@ -1,12 +1,11 @@
-const path = require("path");
-const fs = require("fs");
+import path = require("path");
+import fs = require("fs");
 import { Octokit } from "@octokit/rest";
 import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types";
 import { PullRequestEssentials, RepoWithPulls } from "./utils/interfaces";
 
 const pullsDataFile = path.join(__dirname, "../pulls.json");
-const config = require(path.join(__dirname, "../config.json"));
-const octokit = new Octokit({ auth: config.auth });
+const octokit = new Octokit({ auth: process.env["APIToken"] });
 
 async function getRepos(
   page: number
@@ -24,11 +23,11 @@ async function getRepos(
 }
 
 async function getAllRepos() {
-  let records: RestEndpointMethodTypes["teams"]["listReposInOrg"]["response"]["data"] = [];
+  const records: RestEndpointMethodTypes["teams"]["listReposInOrg"]["response"]["data"] = [];
   let keepGoing = true;
   let offset = 0;
   while (keepGoing) {
-    let response = await getRepos(offset);
+    const response = await getRepos(offset);
     await records.push.apply(records, response);
     offset += 1;
     if (response.length === 0) {
@@ -40,7 +39,7 @@ async function getAllRepos() {
 }
 
 export async function getAllPRs(): Promise<RepoWithPulls[]> {
-  let records = (await getAllRepos()).filter(
+  const records = (await getAllRepos()).filter(
     (v, i, self) => self.indexOf(v) === i
   );
 
@@ -72,7 +71,7 @@ export async function getAllPRs(): Promise<RepoWithPulls[]> {
 
   const deduped = prs.filter((item, index) => prs.indexOf(item) === index);
   fs.writeFileSync(pullsDataFile, JSON.stringify(deduped, null, 2));
-  return deduped;
+  return deduped as RepoWithPulls[];
 }
 
 if (require.main === module) {

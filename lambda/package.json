@@ -6,16 +6,24 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "pulls:get": "ts-node src/getPulls.ts",
+    "pulls:count": "ts-node src/countPulls.ts",
     "start": "npm run pulls:get && npm run pulls:count",
     "handler": "ts-node src/handler.ts",
-    "pulls:count": "ts-node src/countPulls.ts"
+    "compile": "tsc",
+    "deploy": "npm run compile && node-riffraff-artifact"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@guardian/node-riffraff-artifact": "^0.1.9",
     "@octokit/rest": "^17.11.0",
     "aws-sdk": "^2.709.0",
     "typescript": "^3.9.5"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "@typescript-eslint/parser": "^3.5.0",
+    "eslint": "^7.3.1"
   }
 }
