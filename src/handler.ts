@@ -27,20 +27,26 @@ const createMetric = (
 };
 
 const handler = async (event?, context?) => {
-  const pulls = await getAllPRs();
-  const counted = countOpenPRs({ data: pulls });
-  const cloudwatch = new CloudWatch({
-    region: "eu-west-1",
-    credentials: new SharedIniFileCredentials({ profile: "media-service" })
-  });
+  try {
+    const pulls = await getAllPRs();
+    const counted = countOpenPRs({ data: pulls });
+    const cloudwatch = new CloudWatch({
+      region: "eu-west-1",
+      credentials: new SharedIniFileCredentials({ profile: "media-service" })
+    });
 
-  let n = 0;
-  while (n < counted.length) {
-    const metrics = createMetric(counted.slice(n, n + 20));
-    await cloudwatch.putMetricData(metrics).promise();
-    n += 20;
+    let n = 0;
+    while (n < counted.length) {
+      const metrics = createMetric(counted.slice(n, n + 20));
+      await cloudwatch.putMetricData(metrics).promise();
+      n += 20;
+    }
+    console.log(`${counted.length} repo state uploaded to CW`);
+  } catch (err) {
+    console.error(err);
   }
 };
+
 if (require.main === module) {
   (async () => await handler())();
 }

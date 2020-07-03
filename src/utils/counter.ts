@@ -40,6 +40,5 @@ export function countOpenPRs({
     JSON.stringify(sorted, null, 2)
   );
 
-  console.log(sorted);
   return sorted;
 }
