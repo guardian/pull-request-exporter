@@ -36,10 +36,5 @@ export function countOpenPRs({
 
   console.log(`${total} total number of pull requests`);
 
-  fs.writeFileSync(
-    path.join(__dirname, "../../counted-pulls.json"),
-    JSON.stringify(sorted, null, 2)
-  );
-
   return sorted;
 }

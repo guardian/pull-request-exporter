@@ -4,6 +4,7 @@ Parameters:
   GitHubAPIToken:
     Description: GitHub API token with `repo` permissions
     Type: String
+    NoEcho: true
   Stage:
     Type: String
     Description: Environment name
@@ -67,6 +68,8 @@ Resources:
           STACK: media-service
           APP: pull-request-exporter
           STAGE: !Ref 'Stage'
+          APIToken: !Ref GitHubAPIToken
+
       Code:
         S3Bucket: media-service-dist
         S3Key: !Sub 'media-service/${Stage}/pull-request-exporter/pull-request-exporter.zip'
@@ -80,4 +83,3 @@ Resources:
         - { Key: Stack, Value: media-service }
         - { Key: Stage, Value: !Ref Stage }
         - { Key: App, Value: pull-request-exporter }
-        - { Key: APIToken, Value: !Ref GitHubAPIToken }

@@ -1,10 +1,10 @@
-import path = require("path");
-import fs = require("fs");
 import { Octokit } from "@octokit/rest";
 import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types";
 import { PullRequestEssentials, RepoWithPulls } from "./utils/interfaces";
 
-const pullsDataFile = path.join(__dirname, "../pulls.json");
+if (!process.env["APIToken"]) {
+  throw new Error("No APIToken envar for GitHub");
+}
 const octokit = new Octokit({ auth: process.env["APIToken"] });
 
 async function getRepos(
@@ -70,7 +70,6 @@ export async function getAllPRs(): Promise<RepoWithPulls[]> {
   ).filter((p) => p != null && p.pulls.length > 0);
 
   const deduped = prs.filter((item, index) => prs.indexOf(item) === index);
-  fs.writeFileSync(pullsDataFile, JSON.stringify(deduped, null, 2));
   return deduped as RepoWithPulls[];
 }
 
