@@ -1,16 +1,11 @@
 export interface RepoWithPulls {
-  repo: string;
+  repository: string;
   pulls: PullRequestEssentials[];
 }
 
 export interface PullRequestEssentials {
-  prTitle: string;
+  title: string;
   age: string;
   openedBy: string;
   requestedReviewers: string[];
-}
-
-export interface Pull {
-  repo: string;
-  pulls: PullRequestEssentials[];
 }

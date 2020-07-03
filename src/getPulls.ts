@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 import { Octokit } from "@octokit/rest";
 import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types";
-import { PullRequestEssentials } from "./utils/interfaces";
+import { PullRequestEssentials, RepoWithPulls } from "./utils/interfaces";
 
 const pullsDataFile = path.join(__dirname, "../pulls.json");
 const config = require(path.join(__dirname, "../config.json"));
@@ -39,7 +39,7 @@ async function getAllRepos() {
   return records;
 }
 
-export async function getAllPRs() {
+export async function getAllPRs(): Promise<RepoWithPulls[]> {
   let records = (await getAllRepos()).filter(
     (v, i, self) => self.indexOf(v) === i
   );
@@ -55,13 +55,13 @@ export async function getAllPRs() {
           });
           const whatICareAbout: PullRequestEssentials[] = pulls.data.map(
             (p) => ({
-              prTitle: p.title,
+              title: p.title,
               age: p.created_at,
               openedBy: p.user.login,
               requestedReviewers: p.requested_reviewers.map((r) => r.login)
             })
           );
-          return { repo: r.name, pulls: whatICareAbout };
+          return { repository: r.name, pulls: whatICareAbout };
         } catch (err) {
           console.error("PR LIST ERROR: ", err.message, err.request.url);
           return null;
@@ -72,6 +72,9 @@ export async function getAllPRs() {
 
   const deduped = prs.filter((item, index) => prs.indexOf(item) === index);
   fs.writeFileSync(pullsDataFile, JSON.stringify(deduped, null, 2));
+  return deduped;
 }
 
-(async () => await getAllPRs())();
+if (require.main === module) {
+  (async () => await getAllPRs())();
+}
