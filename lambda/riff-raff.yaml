@@ -9,11 +9,3 @@ deployments:
       fileName: pull-request-exporter.zip
       functionNames:
        - "pull-request-exporter-function-"
-  cloudformation:
-    type: cloud-formation
-    app: pull-request-exporter-lambda
-    parameters:
-      prependStackToCloudFormationStackName: false
-      cloudFormationStackName: pull-request-exporter-lambda
-      templatePath: pull-request-exporter.yaml
-      cloudFormationStackByTags: false
