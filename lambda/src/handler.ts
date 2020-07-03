@@ -39,7 +39,11 @@ export const handler = async (): Promise<RepoWithPulls[]> => {
     let n = 0;
     while (n < counted.length) {
       const metrics = createMetric(counted.slice(n, n + 20));
-      await cloudwatch.putMetricData(metrics).promise();
+      console.log(`Uploading metrics for ${n} to ${n + 20} pulls`);
+      await cloudwatch
+        .putMetricData(metrics)
+        .promise()
+        .catch((err) => console.error(err));
       n += 20;
     }
     console.log(`${counted.length} repo state uploaded to CW`);
