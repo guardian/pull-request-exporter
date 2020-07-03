@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Pull Request Metrics Exporter
+Description: Pull Request Metrics Exporter https://github.com/guardian/pull-request-exporter
 Parameters:
   GitHubAPIToken:
     Description: GitHub API token with `repo` permissions
@@ -70,7 +70,7 @@ Resources:
       Code:
         S3Bucket: media-service-dist
         S3Key: !Sub 'media-service/${Stage}/pull-request-exporter/pull-request-exporter.zip'
-      Description: Lambda exporting pull request metrics to CloudWatch
+      Description: Lambda exporting pull request metrics to CloudWatch (https://github.com/guardian/pull-request-exporter)
       MemorySize: '256'
       Timeout: '30'
       Handler: build/src/handler.handler
