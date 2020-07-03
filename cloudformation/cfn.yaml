@@ -80,4 +80,4 @@ Resources:
         - { Key: Stack, Value: media-service }
         - { Key: Stage, Value: !Ref Stage }
         - { Key: App, Value: pull-request-exporter }
-        - { Key: APIToken, Value: !Sub GitHubAPIToken }
+        - { Key: APIToken, Value: !Ref GitHubAPIToken }
