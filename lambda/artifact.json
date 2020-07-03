@@ -6,11 +6,6 @@
       "action": "pull-request-exporter",
       "path": "./",
       "compress": "zip"
-    },
-    {
-      "action": "cloudformation",
-      "path": "../cloudformation/cfn.yaml",
-      "compress": false
     }
   ]
 }
