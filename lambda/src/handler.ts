@@ -25,7 +25,7 @@ const createMetric = (
   };
 };
 
-export const handler = async (): Promise<void> => {
+export const handler = async (): Promise<RepoWithPulls[]> => {
   try {
     const pulls = await getAllPRs();
     const counted = countOpenPRs({ data: pulls });
@@ -43,6 +43,7 @@ export const handler = async (): Promise<void> => {
       n += 20;
     }
     console.log(`${counted.length} repo state uploaded to CW`);
+    return counted;
   } catch (err) {
     console.error(err);
     throw err;
