@@ -7,19 +7,29 @@ const createMetric = (
   repos: RepoWithPulls[],
   overrides?: { metricName: string; valueKey: string }
 ): CloudWatch.PutMetricDataInput => {
-  const metricData = repos.map((repo) => ({
-    MetricName: overrides?.metricName ?? "open_pull_requests" /* required */,
-    Dimensions: [
-      {
-        Name: "Repository" /* required */,
-        Value: repo.repository /* required */
-      }
-      /* more items */
-    ],
-    Timestamp: new Date(),
-    Unit: "Count",
-    Value: overrides?.valueKey ? repo[overrides.valueKey] : repo.pulls.length
-  }));
+  const metricData = repos.map((repo) => {
+    if (overrides && !repo[overrides.valueKey]) {
+      throw new Error(
+        `No key ${overrides.valueKey} in repo ${
+          repo.repository
+        } with keys ${Object.keys(repo)}`
+      );
+    }
+
+    return {
+      MetricName: overrides?.metricName ?? "open_pull_requests" /* required */,
+      Dimensions: [
+        {
+          Name: "Repository" /* required */,
+          Value: repo.repository /* required */
+        }
+        /* more items */
+      ],
+      Timestamp: new Date(),
+      Unit: "Count",
+      Value: overrides?.valueKey ? repo[overrides.valueKey] : repo.pulls.length
+    };
+  });
   return {
     MetricData: metricData,
     Namespace: "GitHub"
