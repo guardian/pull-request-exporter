@@ -8,7 +8,7 @@ const createMetric = (
   overrides?: { metricName: string; valueKey: string }
 ): CloudWatch.PutMetricDataInput => {
   const metricData = repos.map((repo) => {
-    if (overrides && !repo[overrides.valueKey]) {
+    if (overrides && repo[overrides.valueKey] === undefined) {
       throw new Error(
         `No key ${overrides.valueKey} in repo ${
           repo.repository
