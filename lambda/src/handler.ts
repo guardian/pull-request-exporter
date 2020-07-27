@@ -53,21 +53,23 @@ export const handler = async (): Promise<RepoWithPulls[]> => {
     while (n < counted.length) {
       const metricsToShip = counted.slice(n, n + 20);
 
-      const metrics = createMetric(metricsToShip);
       console.log(`Uploading metrics for ${n} to ${n + 20} pulls`);
-      await cloudwatch
-        .putMetricData(metrics)
-        .promise()
-        .catch((err) => console.error(err));
+      await Promise.all(
+        ["count", "botCount", "humanCount"].map((metricName) => {
+          const metrics = createMetric(metricsToShip, {
+            metricName,
+            valueKey: metricName
+          });
 
-      const botMetrics = createMetric(metricsToShip, {
-        metricName: "bot_pull_requests",
-        valueKey: "botCount"
-      });
-      await cloudwatch
-        .putMetricData(botMetrics)
-        .promise()
-        .catch((err) => console.error(err));
+          console.log(`Uploading ${metricName} metrics for ${n}`);
+
+          cloudwatch
+            .putMetricData(metrics)
+            .promise()
+            .catch((err) => console.error(err));
+        })
+      );
+
       n += 20;
     }
     console.log(`${counted.length} repo state uploaded to CW`);

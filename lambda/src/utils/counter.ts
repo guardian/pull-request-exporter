@@ -30,9 +30,16 @@ export function countOpenPRs({
     )
     .map((repo: RepoWithPulls) => {
       total += repo.pulls.length;
-      const totalBotPulls = repo.pulls.filter((p) => pullIsBot(p)).length;
+      const botCount = repo.pulls.filter((p) => pullIsBot(p)).length;
+      const humanCount = repo.pulls.filter((p) => !pullIsBot(p)).length;
       const pulls = bots ? repo.pulls : filterBots(repo);
-      return { ...repo, pulls, count: pulls.length, botCount: totalBotPulls };
+      return {
+        ...repo,
+        pulls,
+        count: pulls.length,
+        botCount,
+        humanCount
+      };
     });
 
   console.log(`${total} total number of pull requests`);
