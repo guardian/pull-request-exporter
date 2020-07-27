@@ -4,10 +4,11 @@ import { RepoWithPulls } from "./utils/interfaces";
 import { SharedIniFileCredentials, CloudWatch } from "aws-sdk";
 
 const createMetric = (
-  repos: RepoWithPulls[]
+  repos: RepoWithPulls[],
+  overrides?: { metricName: string; valueKey: string }
 ): CloudWatch.PutMetricDataInput => {
   const metricData = repos.map((repo) => ({
-    MetricName: "open_pull_requests" /* required */,
+    MetricName: overrides?.metricName ?? "open_pull_requests" /* required */,
     Dimensions: [
       {
         Name: "Repository" /* required */,
@@ -17,7 +18,7 @@ const createMetric = (
     ],
     Timestamp: new Date(),
     Unit: "Count",
-    Value: repo.pulls.length
+    Value: overrides?.valueKey ? repo[overrides.valueKey] : repo.pulls.length
   }));
   return {
     MetricData: metricData,
@@ -40,10 +41,21 @@ export const handler = async (): Promise<RepoWithPulls[]> => {
 
     console.log(`Uploading metrics for ${counted.length} repositories`);
     while (n < counted.length) {
-      const metrics = createMetric(counted.slice(n, n + 20));
+      const metricsToShip = counted.slice(n, n + 20);
+
+      const metrics = createMetric(metricsToShip);
       console.log(`Uploading metrics for ${n} to ${n + 20} pulls`);
       await cloudwatch
         .putMetricData(metrics)
+        .promise()
+        .catch((err) => console.error(err));
+
+      const botMetrics = createMetric(metricsToShip, {
+        metricName: "bot_pull_requests",
+        valueKey: "botCount"
+      });
+      await cloudwatch
+        .putMetricData(botMetrics)
         .promise()
         .catch((err) => console.error(err));
       n += 20;

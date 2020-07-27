@@ -6,5 +6,6 @@ import * as path from "path";
   if (!file) {
     throw new Error("Please pass file path as argument");
   }
-  countOpenPRs({ file: path.join(process.cwd(), file) });
+  const result = countOpenPRs({ file: path.join(process.cwd(), file) });
+  console.log(result);
 })();
