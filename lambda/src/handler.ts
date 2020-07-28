@@ -4,21 +4,32 @@ import { RepoWithPulls } from "./utils/interfaces";
 import { SharedIniFileCredentials, CloudWatch } from "aws-sdk";
 
 const createMetric = (
-  repos: RepoWithPulls[]
+  repos: RepoWithPulls[],
+  overrides?: { metricName: string; valueKey: string }
 ): CloudWatch.PutMetricDataInput => {
-  const metricData = repos.map((repo) => ({
-    MetricName: "open_pull_requests" /* required */,
-    Dimensions: [
-      {
-        Name: "Repository" /* required */,
-        Value: repo.repository /* required */
-      }
-      /* more items */
-    ],
-    Timestamp: new Date(),
-    Unit: "Count",
-    Value: repo.pulls.length
-  }));
+  const metricData = repos.map((repo) => {
+    if (overrides && repo[overrides.valueKey] === undefined) {
+      throw new Error(
+        `No key ${overrides.valueKey} in repo ${
+          repo.repository
+        } with keys ${Object.keys(repo)}`
+      );
+    }
+
+    return {
+      MetricName: overrides?.metricName ?? "open_pull_requests" /* required */,
+      Dimensions: [
+        {
+          Name: "Repository" /* required */,
+          Value: repo.repository /* required */
+        }
+        /* more items */
+      ],
+      Timestamp: new Date(),
+      Unit: "Count",
+      Value: overrides?.valueKey ? repo[overrides.valueKey] : repo.pulls.length
+    };
+  });
   return {
     MetricData: metricData,
     Namespace: "GitHub"
@@ -40,12 +51,26 @@ export const handler = async (): Promise<RepoWithPulls[]> => {
 
     console.log(`Uploading metrics for ${counted.length} repositories`);
     while (n < counted.length) {
-      const metrics = createMetric(counted.slice(n, n + 20));
+      const metricsToShip = counted.slice(n, n + 20);
+
       console.log(`Uploading metrics for ${n} to ${n + 20} pulls`);
-      await cloudwatch
-        .putMetricData(metrics)
-        .promise()
-        .catch((err) => console.error(err));
+      await Promise.all(
+        ["count", "botCount", "humanCount"].map(async (metricName) => {
+          const metrics = createMetric(metricsToShip, {
+            metricName,
+            valueKey: metricName
+          });
+
+          console.log(`Uploading ${metricName} metrics for ${n}`);
+
+          const res = await cloudwatch
+            .putMetricData(metrics)
+            .promise()
+            .catch((err) => console.error("putMetricData error:", err));
+          console.log("putMetricData response", res);
+        })
+      );
+
       n += 20;
     }
     console.log(`${counted.length} repo state uploaded to CW`);

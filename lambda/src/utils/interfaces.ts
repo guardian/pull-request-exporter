@@ -1,6 +1,8 @@
 export interface RepoWithPulls {
   repository: string;
   pulls: PullRequestEssentials[];
+  count?: number;
+  botCount?: number;
 }
 
 export interface PullRequestEssentials {
