@@ -55,7 +55,7 @@ export const handler = async (): Promise<RepoWithPulls[]> => {
 
       console.log(`Uploading metrics for ${n} to ${n + 20} pulls`);
       await Promise.all(
-        ["count", "botCount", "humanCount"].map((metricName) => {
+        ["count", "botCount", "humanCount"].map(async (metricName) => {
           const metrics = createMetric(metricsToShip, {
             metricName,
             valueKey: metricName
@@ -63,10 +63,11 @@ export const handler = async (): Promise<RepoWithPulls[]> => {
 
           console.log(`Uploading ${metricName} metrics for ${n}`);
 
-          cloudwatch
+          const res = await cloudwatch
             .putMetricData(metrics)
             .promise()
-            .catch((err) => console.error(err));
+            .catch((err) => console.error("putMetricData error:", err));
+          console.log("putMetricData response", res);
         })
       );
 
