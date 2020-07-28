@@ -5,29 +5,33 @@ import { SharedIniFileCredentials, CloudWatch } from "aws-sdk";
 
 const createMetric = (
   repos: RepoWithPulls[],
-  overrides?: { metricName: string; valueKey: string }
+  { metricName, valueKey }: { metricName: string; valueKey: string }
 ): CloudWatch.PutMetricDataInput => {
   const metricData = repos.map((repo) => {
-    if (overrides && repo[overrides.valueKey] === undefined) {
+    if (repo[valueKey] === undefined) {
       throw new Error(
-        `No key ${overrides.valueKey} in repo ${
-          repo.repository
-        } with keys ${Object.keys(repo)}`
+        `No key ${valueKey} in repo ${repo.repository} with keys ${Object.keys(
+          repo
+        )}`
       );
     }
 
+    const value = repo[valueKey];
+
+    console.log(`${metricName}: ${value} for repo ${repo.repository}`);
+
     return {
-      MetricName: overrides?.metricName ?? "open_pull_requests" /* required */,
+      MetricName: metricName,
       Dimensions: [
         {
-          Name: "Repository" /* required */,
-          Value: repo.repository /* required */
+          Name: "Repository",
+          Value: repo.repository
         }
         /* more items */
       ],
       Timestamp: new Date(),
       Unit: "Count",
-      Value: overrides?.valueKey ? repo[overrides.valueKey] : repo.pulls.length
+      Value: value
     };
   });
   return {
@@ -61,13 +65,13 @@ export const handler = async (): Promise<RepoWithPulls[]> => {
             valueKey: metricName
           });
 
-          console.log(`Uploading ${metricName} metrics for ${n}`);
-
-          const res = await cloudwatch
-            .putMetricData(metrics)
-            .promise()
-            .catch((err) => console.error("putMetricData error:", err));
-          console.log("putMetricData response", res);
+          try {
+            const res = await cloudwatch.putMetricData(metrics).promise();
+            console.log("putMetricData response", res);
+          } catch (e) {
+            console.error(e);
+            throw e;
+          }
         })
       );
 
