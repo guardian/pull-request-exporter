@@ -2,6 +2,9 @@
 
 Ships metrics about pull requests to AWS CloudWatch
 
+## To deploy
+
+Deploy this project through TeamCity and RiffRaff.
 
 ## To run
 
